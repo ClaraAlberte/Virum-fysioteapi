@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="nav-header">
+  <h1>Statistik: {{ skema.navn }}</h1>
+  <a href="{{ url_for('admin_panel') }}">← Tilbage til panelet</a>
+</div>
+
+<div class="card">
+  <h2>Filtrér svar</h2>
+  <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Vælg kriterier nedenfor for at se statistik for en specifik gruppe.</p>
+  <div id="filtre" style="display: flex; gap: 1rem; flex-wrap: wrap;"></div>
+  
+  <div style="margin-top: 1.5rem; padding: 1rem; background: #e0f2fe; border-radius: 8px; border: 1px solid #bae6fd;">
+    <strong>Antal svar i udvalget:</strong> <span id="antal" style="font-size: 1.2rem; color: var(--primary);">0</span>
+  </div>
+</div>
+
+<div class="card" id="resultat"></div>
+
+<script>
+const skema = {{ skema|tojson }};
+const alleSvar = {{ svar|tojson }};
+
+const filtreDiv = document.getElementById("filtre");
+const filterValg = {};
+
+skema.spoergsmaal.forEach((sp) => {
+  if (sp.type === "valg") {
+    const div = document.createElement("div");
+    div.style.flex = "1";
+    div.style.minWidth = "200px";
+    
+    const label = document.createElement("label");
+    label.textContent = sp.tekst;
+    label.style.marginTop = "0";
+    
+    const sel = document.createElement("select");
+    sel.innerHTML = `<option value="">Alle</option>` +
+      sp.valg.map(v => `<option>${v}</option>`).join("");
+    sel.addEventListener("change", opdater);
+    
+    div.appendChild(label);
+    div.appendChild(sel);
+    filtreDiv.appendChild(div);
+    filterValg[sp.tekst] = sel;
+  }
+});
+
+function opdater() {
+  let data = alleSvar.slice();
+  for (const [spoergsmaal, sel] of Object.entries(filterValg)) {
+    if (sel.value) data = data.filter(d => d[spoergsmaal] === sel.value);
+  }
+
+  document.getElementById("antal").textContent = data.length;
+  const res = document.getElementById("resultat");
+  res.innerHTML = "";
+
+  if (data.length === 0) {
+    res.innerHTML = "<p style='color: var(--text-muted);'>Ingen svar matcher det valgte filter.</p>";
+    return;
+  }
+
+  skema.spoergsmaal.forEach(sp => {
+    if (sp.type === "valg") {
+      const fordeling = {};
+      data.forEach(d => {
+        const v = d[sp.tekst] || "(tom)";
+        fordeling[v] = (fordeling[v] || 0) + 1;
+      });
+      let html = `<h3 style="margin-top: 2rem; font-size: 1.1rem;">${sp.tekst}</h3>`;
+      Object.entries(fordeling).forEach(([navn, antal]) => {
+        const pct = Math.round(antal / data.length * 100);
+        html += `<div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-top: 0.5rem;">
+                  <span>${navn}</span>
+                  <span><strong>${antal}</strong> (${pct}%)</span>
+                 </div>
+                 <div class="bar-container"><div class="bar-fill" style="width:${pct}%"></div></div>`;
+      });
+      res.innerHTML += html;
+    } else if (sp.type === "nummer") {
+      const tal = data.map(d => Number(d[sp.tekst])).filter(n => !isNaN(n));
+      if (tal.length) {
+        const gns = (tal.reduce((a, b) => a + b, 0) / tal.length).toFixed(1);
+        res.innerHTML += `<h3 style="margin-top: 2rem; font-size: 1.1rem;">${sp.tekst}</h3>
+                          <p>Gennemsnit: <strong>${gns}</strong> (baseret på ${tal.length} svar)</p>`;
+      }
+    }
+  });
+}
+
+opdater();
+</script>
+{% endblock %}

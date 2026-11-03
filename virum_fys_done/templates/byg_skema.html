@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="nav-header">
+  <h1>{{ "Rediger" if skema.id else "Nyt" }} spørgeskema</h1>
+  <a href="{{ url_for('admin_panel') }}">← Tilbage</a>
+</div>
+
+<div class="card">
+  <form method="post" id="skemaForm">
+    <label>Spørgeskemaets titel (fx "Tilfredshedsundersøgelse")</label>
+    <input type="text" name="navn" value="{{ skema.navn }}" required placeholder="Indtast titel...">
+
+    <h3 style="margin-top: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">Spørgsmål</h3>
+    <div id="spoergsmaalListe">
+      {% for sp in skema.spoergsmaal %}
+      <div class="spoergsmaal-block">
+        <label>Spørgsmålstekst</label>
+        <input type="text" name="spoergsmaal_{{ loop.index0 }}" value="{{ sp.tekst }}" required>
+        
+        <label>Svartype</label>
+        <select name="type_{{ loop.index0 }}" class="type-vaelger" onchange="toggleValg(this)">
+          <option value="text" {% if sp.type=="text" %}selected{% endif %}>Fritekst (kort svar)</option>
+          <option value="valg" {% if sp.type=="valg" %}selected{% endif %}>Valgmuligheder (flere valg)</option>
+          <option value="nummer" {% if sp.type=="nummer" %}selected{% endif %}>Tal (fx alder)</option>
+        </select>
+        
+        <div class="valg-container" style="{% if sp.type != 'valg' %}display: none;{% endif %} margin-top: 1rem;">
+          <label>Svarmuligheder (adskil med komma)</label>
+          <input type="text" name="valg_{{ loop.index0 }}" value="{{ sp.valg|join(', ') }}" placeholder="Fx: Meget tilfreds, Tilfreds, Utilfreds">
+        </div>
+
+        <button type="button" class="btn-danger" style="position: absolute; top: 1rem; right: 1rem;" onclick="this.parentElement.remove()">Slet</button>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+      <button type="button" class="btn btn-secondary" onclick="tilfoej()">+ Tilføj spørgsmål</button>
+      <button type="submit">Gem spørgeskema</button>
+    </div>
+  </form>
+</div>
+
+<script>
+let antal = {{ skema.spoergsmaal|length }};
+
+function toggleValg(selectElement) {
+  const container = selectElement.parentElement.querySelector('.valg-container');
+  if (selectElement.value === 'valg') {
+    container.style.display = 'block';
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+function tilfoej() {
+  const div = document.createElement("div");
+  div.className = "spoergsmaal-block";
+  div.innerHTML = `
+    <label>Spørgsmålstekst</label>
+    <input type="text" name="spoergsmaal_${antal}" required>
+    
+    <label>Svartype</label>
+    <select name="type_${antal}" class="type-vaelger" onchange="toggleValg(this)">
+      <option value="text">Fritekst (kort svar)</option>
+      <option value="valg">Valgmuligheder (flere valg)</option>
+      <option value="nummer">Tal (fx alder)</option>
+    </select>
+    
+    <div class="valg-container" style="display: none; margin-top: 1rem;">
+      <label>Svarmuligheder (adskil med komma)</label>
+      <input type="text" name="valg_${antal}" placeholder="Fx: Ja, Nej, Ved ikke">
+    </div>
+
+    <button type="button" class="btn-danger" style="position: absolute; top: 1rem; right: 1rem;" onclick="this.parentElement.remove()">Slet</button>
+  `;
+  document.getElementById("spoergsmaalListe").appendChild(div);
+  antal++;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="margin-top: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+  <h1 style="text-align: center; color: var(--primary);">{{ skema.navn }}</h1>
+  <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Dine svar er 100% anonyme.</p>
+
+  {% if tak %}
+    <div class="alert alert-success" style="text-align: center; font-size: 1.1rem;">
+      ✅ Tak for dit svar!<br>
+      <span style="font-weight: normal; font-size: 0.9rem;">Du kan nu lukke denne side.</span>
+    </div>
+  {% else %}
+  <form method="post">
+    {% for sp in skema.spoergsmaal %}
+      <label>{{ sp.tekst }}</label>
+      {% if sp.type == "valg" %}
+        <select name="s_{{ loop.index0 }}" required>
+          <option value="" disabled selected>Vælg en mulighed...</option>
+          {% for v in sp.valg %}<option>{{ v }}</option>{% endfor %}
+        </select>
+      {% elif sp.type == "nummer" %}
+        <input type="number" name="s_{{ loop.index0 }}" required placeholder="Indtast tal...">
+      {% else %}
+        <input type="text" name="s_{{ loop.index0 }}" required placeholder="Skriv dit svar her...">
+      {% endif %}
+    {% endfor %}
+    <button type="submit" style="width: 100%; margin-top: 2rem; padding: 1rem;">Send svar</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

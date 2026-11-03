@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="nav-header">
+  <h1>Admin Panel</h1>
+  <a href="{{ url_for('admin_logout') }}">Log ud</a>
+</div>
+
+<div class="card">
+  <h2>Dine spørgeskemaer</h2>
+  <a class="btn" href="{{ url_for('byg_skema') }}">+ Opret nyt spørgeskema</a>
+
+  {% if skemaer %}
+  <table style="margin-top: 2rem;">
+    <tr>
+      <th>Navn</th>
+      <th>Oprettet</th>
+      <th>Handlinger</th>
+    </tr>
+    {% for id, navn, oprettet in skemaer %}
+    <tr>
+      <td><strong>{{ navn }}</strong></td>
+      <td style="color: var(--text-muted);">{{ oprettet }}</td>
+      <td>
+        <a href="{{ url_for('statistik', skema_id=id) }}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; margin:0;">Se statistik</a>
+        <a href="{{ url_for('byg_skema', skema_id=id) }}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; margin:0;">Rediger</a>
+        <a href="{{ url_for('besvar', skema_id=id) }}" target="_blank" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; margin:0;">Åbn link</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p style="margin-top: 1.5rem; color: var(--text-muted);">Der er endnu ikke oprettet nogen spørgeskemaer.</p>
+  {% endif %}
+</div>
+{% endblock %}
