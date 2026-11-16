@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Print: {{ skema.navn }}{% endblock %}
+{% block content %}
+
+<div class="print-toolbar no-print">
+  <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary">← Tilbage</a>
+  <button onclick="window.print()" class="btn">🖨️ Print / Gem som PDF</button>
+  <span style="align-self:center; color:var(--text-muted); font-size:0.88rem;">
+    Tip: Vælg "Gem som PDF" i print-dialogen for at downloade som fil.
+  </span>
+</div>
+
+<div class="preview-a4">
+  <div class="print-page">
+    <div class="print-header">
+      <h1>{{ skema.navn }}</h1>
+    </div>
+
+    <div class="print-grid">
+      {% for raekke in raekker %}
+        {% set er_par = raekke|length == 2 %}
+        
+        {% for sp in raekke %}
+          <div class="print-q {% if not er_par %}fuld-bredde{% endif %}">
+            <h3>{{ sp.nummer }}. {{ sp.tekst }}</h3>
+
+            {% if sp.type == "valg" %}
+              {% for v in sp.valg %}
+                <div class="print-option"><span class="print-box"></span>{{ v }}</div>
+              {% endfor %}
+
+            {% elif sp.type == "nummer" %}
+              <div class="print-line" style="max-width:180px;"></div>
+
+            {% elif sp.type == "likert" %}
+              {% set lo = sp.likert_min or 1 %}
+              {% set hi = sp.likert_max or 5 %}
+              {% set tekster = sp.likert_tekster or [] %}
+              <div class="likert-wrap">
+                {% if tekster and tekster|length >= 2 %}
+                  <div class="likert-labels">
+                    <span>{{ tekster[0] }}</span>
+                    <span>{{ tekster[-1] }}</span>
+                  </div>
+                {% endif %}
+                <table class="likert-tabel">
+                  <tr>
+                    {% for n in range(lo, hi + 1) %}
+                      <td><span class="print-box"></span><small>{{ n }}</small></td>
+                    {% endfor %}
+                  </tr>
+                </table>
+              </div>
+
+            {% else %}
+              <div class="print-line"></div>
+              <div class="print-line"></div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+    {% if skema.print_footer %}
+      <div class="print-footer">{{ skema.print_footer }}</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

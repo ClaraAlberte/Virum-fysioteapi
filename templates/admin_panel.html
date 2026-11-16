@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel – Virum Fysioterapi{% endblock %}
+{% block content %}
+<div class="nav-header">
+  <h1>Admin Panel</h1>
+  <a href="{{ url_for('admin_logout') }}" class="btn btn-secondary btn-sm">Log ud</a>
+</div>
+
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1rem;">
+    <h2 style="margin:0;">Dine spørgeskemaer</h2>
+    <a class="btn" href="{{ url_for('byg_skema') }}">＋ Opret nyt</a>
+  </div>
+
+  {% if skemaer %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Navn</th><th>Oprettet</th><th>Handlinger</th></tr>
+      </thead>
+      <tbody>
+      {% for id, navn, oprettet in skemaer %}
+        <tr>
+          <td><strong>{{ navn }}</strong></td>
+          <td style="color:var(--text-muted); font-size:0.88rem;">{{ oprettet }}</td>
+          <td>
+            <div class="actions">
+              <a href="{{ url_for('statistik', skema_id=id) }}" class="btn btn-sm">📊 Statistik</a>
+              <a href="{{ url_for('byg_skema', skema_id=id) }}" class="btn btn-secondary btn-sm">✏️ Rediger</a>
+              <a href="{{ url_for('besvar', skema_id=id) }}" target="_blank" class="btn btn-secondary btn-sm">👁️ Åbn</a>
+              <a href="{{ url_for('print_skema', skema_id=id) }}" target="_blank" class="btn btn-secondary btn-sm">🖨️ Print</a>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="margin-top:1.5rem; color:var(--text-muted);">Der er endnu ikke oprettet nogen spørgeskemaer.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ skema.navn }} – Virum Fysioterapi{% endblock %}
+{% block content %}
+<div class="card besvar-card">
+  <div class="besvar-header">
+    <h1>{{ skema.navn }}</h1>
+    <p>🔒 Dine svar er 100 % anonyme</p>
+  </div>
+
+  {% if tak %}
+    <div class="alert alert-success" style="text-align:center; flex-direction:column; align-items:center; font-size:1.05rem;">
+      <span style="font-size:2rem;">✅</span>
+      <strong>Tak for dit svar!</strong>
+      <span style="font-weight:400; font-size:0.9rem;">Du kan nu lukke denne side.</span>
+    </div>
+  {% else %}
+  <form method="post">
+    {% for sp in skema.spoergsmaal %}
+      {% set idx = loop.index0 %}
+      <div class="sp-felt">
+        <label><span class="sp-num">{{ loop.index }}</span>{{ sp.tekst }}</label>
+
+        {% if sp.type == "valg" %}
+          <select name="s_{{ idx }}" required>
+            <option value="" disabled selected>Vælg en mulighed…</option>
+            {% for v in sp.valg %}<option>{{ v }}</option>{% endfor %}
+          </select>
+
+        {% elif sp.type == "nummer" %}
+          <input type="number" name="s_{{ idx }}" required placeholder="Indtast tal…">
+
+        {% elif sp.type == "likert" %}
+          {% set lo = sp.likert_min or 1 %}
+          {% set hi = sp.likert_max or 5 %}
+          {% set tekster = sp.likert_tekster or [] %}
+          <div class="likert-wrap">
+            {% if tekster and tekster|length >= 2 %}
+              <div class="likert-labels">
+                <span>{{ tekster[0] }}</span>
+                <span>{{ tekster[-1] }}</span>
+              </div>
+            {% endif %}
+            <div class="likert-rad">
+              {% for n in range(lo, hi + 1) %}
+                <label class="likert-knap">
+                  <input type="radio" name="s_{{ idx }}" value="{{ n }}" required>
+                  {{ n }}
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+
+        {% else %}
+          <input type="text" name="s_{{ idx }}" required placeholder="Skriv dit svar her…">
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" style="width:100%; margin-top:1.5rem; padding:1rem; font-size:1.05rem;">Send svar</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

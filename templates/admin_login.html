@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 4rem auto;">
+  <h1 style="text-align: center;">Admin Login</h1>
+  <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Kun for Virum Fysioterapi</p>
+  
+  <form method="post">
+    <label>Adgangskode</label>
+    <input type="password" name="password" required autofocus>
+    
+    {% if fejl %}
+      <div class="alert alert-error" style="margin-top: 1rem;">{{ fejl }}</div>
+    {% endif %}
+    
+    <button type="submit" style="width: 100%; margin-top: 1.5rem;">Log ind</button>
+  </form>
+  <div style="text-align: center; margin-top: 1.5rem;">
+    <a href="{{ url_for('forside') }}" style="color: var(--text-muted); font-size: 0.9rem;">← Tilbage til forsiden</a>
+  </div>
+</div>
+{% endblock %}
