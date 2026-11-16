@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}{{ "Rediger" if skema.id else "Nyt" }} spørgeskema{% endblock %}
+{% block content %}
+<div class="nav-header">
+  <h1>{{ "Rediger" if skema.id else "Nyt" }} spørgeskema</h1>
+  <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary btn-sm">← Tilbage</a>
+</div>
+
+<div class="card">
+  <form method="post" id="skemaForm">
+    <label>Spørgeskemaets titel</label>
+    <input type="text" name="navn" value="{{ skema.navn }}" required placeholder="Fx 'Tilfredshedsundersøgelse'">
+
+    <label style="margin-top:1.5rem;">Footer-tekst på print</label>
+    <input type="text" name="print_footer"
+           value="{{ skema.print_footer or default_footer }}"
+           placeholder="{{ default_footer }}">
+    <p style="font-size:0.82rem; color:var(--text-muted); margin-top:0.3rem;">
+      Vises nederst på det printede ark.
+    </p>
+
+    <h3 style="margin-top:2rem; border-bottom:2px solid var(--border); padding-bottom:0.5rem;">Spørgsmål</h3>
+    <div id="spoergsmaalListe">
+      {% for sp in skema.spoergsmaal %}
+      <div class="spoergsmaal-block">
+        <label>Spørgsmålstekst</label>
+        <input type="text" name="spoergsmaal_{{ loop.index0 }}" value="{{ sp.tekst }}" required>
+
+        <label>Bredde på print</label>
+        <select name="bredde_{{ loop.index0 }}">
+          <option value="fuld" {% if sp.bredde != 'halv' %}selected{% endif %}>Fuld bredde (100%)</option>
+          <option value="halv" {% if sp.bredde == 'halv' %}selected{% endif %}>Halv bredde (50% - kan stå ved siden af et andet)</option>
+        </select>
+
+        <label>Svartype</label>
+        <select name="type_{{ loop.index0 }}" class="type-vaelger" onchange="toggleValg(this)">
+          <option value="text"    {% if sp.type=="text"    %}selected{% endif %}>Fritekst</option>
+          <option value="valg"    {% if sp.type=="valg"    %}selected{% endif %}>Valgmuligheder</option>
+          <option value="nummer"  {% if sp.type=="nummer"  %}selected{% endif %}>Tal (fx alder)</option>
+          <option value="likert"  {% if sp.type=="likert"  %}selected{% endif %}>Likert-skala</option>
+        </select>
+
+        <div class="valg-container" style="{% if sp.type != 'valg' %}display:none;{% endif %} margin-top:1rem;">
+          <label>Svarmuligheder (adskil med komma)</label>
+          <input type="text" name="valg_{{ loop.index0 }}" value="{{ sp.valg|join(', ') }}"
+                 placeholder="Fx: Meget tilfreds, Tilfreds, Utilfreds">
+        </div>
+
+        <div class="likert-container" style="{% if sp.type != 'likert' %}display:none;{% endif %} margin-top:1rem;">
+          <label>Likert-skala</label>
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <div style="flex:1; min-width:110px;">
+              <span style="font-size:0.82rem; color:var(--text-muted);">Fra</span>
+              <input type="number" name="likert_min_{{ loop.index0 }}"
+                     value="{{ sp.likert_min or 1 }}" min="0" max="10">
+            </div>
+            <div style="flex:1; min-width:110px;">
+              <span style="font-size:0.82rem; color:var(--text-muted);">Til</span>
+              <input type="number" name="likert_max_{{ loop.index0 }}"
+                     value="{{ sp.likert_max or 5 }}" min="1" max="10">
+            </div>
+          </div>
+          <label style="margin-top:0.75rem;">Tekster ved enderne (valgfri)</label>
+          <input type="text" name="likert_tekster_{{ loop.index0 }}"
+                 value="{{ sp.likert_tekster|join(', ') if sp.likert_tekster else '' }}"
+                 placeholder="Fx: Meget uenig, Meget enig">
+          <p style="font-size:0.8rem; color:var(--text-muted); margin:0.3rem 0 0;">
+            Kun første og sidste tekst vises – adskilt med komma.
+          </p>
+        </div>
+
+        <button type="button" class="btn-danger" onclick="this.parentElement.remove()">Slet</button>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div style="margin-top:2rem; display:flex; gap:1rem; flex-wrap:wrap;">
+      <button type="button" class="btn btn-secondary" onclick="tilfoej()">＋ Tilføj spørgsmål</button>
+      <button type="submit">Gem spørgeskema</button>
+    </div>
+  </form>
+</div>
+
+<script>
+let antal = {{ skema.spoergsmaal|length }};
+
+function toggleValg(selectElement) {
+  const blok = selectElement.parentElement;
+  const vaelgBox   = blok.querySelector('.valg-container');
+  const likertBox  = blok.querySelector('.likert-container');
+  if (vaelgBox)  vaelgBox.style.display  = (selectElement.value === 'valg')   ? 'block' : 'none';
+  if (likertBox) likertBox.style.display = (selectElement.value === 'likert') ? 'block' : 'none';
+}
+
+function tilfoej() {
+  const div = document.createElement("div");
+  div.className = "spoergsmaal-block";
+  div.innerHTML = `
+    <label>Spørgsmålstekst</label>
+    <input type="text" name="spoergsmaal_${antal}" required>
+
+    <label>Bredde på print</label>
+    <select name="bredde_${antal}">
+      <option value="fuld">Fuld bredde (100%)</option>
+      <option value="halv">Halv bredde (50% - kan stå ved siden af et andet)</option>
+    </select>
+
+    <label>Svartype</label>
+    <select name="type_${antal}" class="type-vaelger" onchange="toggleValg(this)">
+      <option value="text">Fritekst</option>
+      <option value="valg">Valgmuligheder</option>
+      <option value="nummer">Tal (fx alder)</option>
+      <option value="likert">Likert-skala</option>
+    </select>
+
+    <div class="valg-container" style="display:none; margin-top:1rem;">
+      <label>Svarmuligheder (adskil med komma)</label>
+      <input type="text" name="valg_${antal}" placeholder="Fx: Ja, Nej, Ved ikke">
+    </div>
+
+    <div class="likert-container" style="display:none; margin-top:1rem;">
+      <label>Likert-skala</label>
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+        <div style="flex:1; min-width:110px;">
+          <span style="font-size:0.82rem; color:var(--text-muted);">Fra</span>
+          <input type="number" name="likert_min_${antal}" value="1" min="0" max="10">
+        </div>
+        <div style="flex:1; min-width:110px;">
+          <span style="font-size:0.82rem; color:var(--text-muted);">Til</span>
+          <input type="number" name="likert_max_${antal}" value="5" min="1" max="10">
+        </div>
+      </div>
+      <label style="margin-top:0.75rem;">Tekster ved enderne (valgfri)</label>
+      <input type="text" name="likert_tekster_${antal}" placeholder="Fx: Meget uenig, Meget enig">
+      <p style="font-size:0.8rem; color:var(--text-muted); margin:0.3rem 0 0;">
+        Kun første og sidste tekst vises – adskilt med komma.
+      </p>
+    </div>
+
+    <button type="button" class="btn-danger" onclick="this.parentElement.remove()">Slet</button>
+  `;
+  document.getElementById("spoergsmaalListe").appendChild(div);
+  antal++;
+}
+</script>
+{% endblock %}

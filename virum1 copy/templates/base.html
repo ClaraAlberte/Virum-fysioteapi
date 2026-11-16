@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Virum Fysioterapi{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #0ea5e9;
+    --primary-hover: #0284c7;
+    --primary-light: #e0f2fe;
+    --bg: #f1f5f9;
+    --surface: #ffffff;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --radius: 14px;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,0.06);
+    --shadow: 0 4px 12px -2px rgba(15,23,42,0.08), 0 2px 4px -2px rgba(15,23,42,0.04);
+    --shadow-lg: 0 12px 24px -8px rgba(15,23,42,0.12);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    background:
+      radial-gradient(circle at 10% -10%, #e0f2fe 0%, transparent 40%),
+      radial-gradient(circle at 90% 0%, #f0f9ff 0%, transparent 40%),
+      var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  .container { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  h1, h2, h3 { color: var(--text); margin-top: 0; line-height: 1.25; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; }
+  h2 { font-size: 1.25rem; font-weight: 600; }
+  h3 { font-size: 1.05rem; font-weight: 600; }
+  a { color: var(--primary); }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(226,232,240,0.8);
+  }
+  @media (max-width: 560px) {
+    .card { padding: 1.25rem; }
+    .container { padding: 1.5rem 0.9rem 3rem; }
+  }
+
+  label { display: block; margin: 1.1rem 0 0.45rem; font-weight: 600; font-size: 0.92rem; }
+  input[type=text], input[type=number], input[type=password], select, textarea {
+    width: 100%;
+    padding: 0.72rem 0.85rem;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 1rem;
+    background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(14,165,233,0.12);
+  }
+
+  button, .btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 0.72rem 1.4rem;
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.97rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    transition: background .15s, transform .05s, box-shadow .15s;
+    box-shadow: 0 1px 2px rgba(2,132,199,.25);
+  }
+  button:hover, .btn:hover { background: var(--primary-hover); box-shadow: 0 3px 8px rgba(2,132,199,.3); }
+  button:active, .btn:active { transform: translateY(1px); }
+  .btn-secondary { background: #f1f5f9; color: var(--text); border: 1.5px solid var(--border); box-shadow: none; }
+  .btn-secondary:hover { background: #e2e8f0; box-shadow: none; }
+  .btn-danger { background: #fef2f2; color: var(--danger); border: 1.5px solid #fecaca; box-shadow: none; padding: 0.4rem 0.75rem; font-size: 0.85rem; }
+  .btn-danger:hover { background: #fee2e2; }
+  .btn-sm { padding: 0.42rem 0.8rem; font-size: 0.84rem; margin: 0; }
+
+  .table-wrap { overflow-x: auto; margin-top: 1.5rem; border-radius: 10px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th { text-align: left; padding: 0.85rem 1rem; background: #f8fafc; color: var(--text-muted); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: .04em; }
+  td { padding: 0.95rem 1rem; border-top: 1px solid var(--border); vertical-align: middle; }
+  tr:hover td { background: #f8fafc; }
+  .actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+  .bar-container { background: #f1f5f9; border-radius: 999px; overflow: hidden; margin: 0.35rem 0 1rem; height: 26px; }
+  .bar-fill { background: linear-gradient(90deg, var(--primary), #38bdf8); color: #fff; height: 100%; display: flex; align-items: center; padding-left: 12px; font-size: 0.78rem; font-weight: 600; transition: width .5s ease-out; min-width: 2px; }
+
+  .alert { padding: 1rem 1.1rem; border-radius: 10px; margin-bottom: 1rem; font-weight: 500; display: flex; gap: 0.6rem; align-items: flex-start; }
+  .alert-success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+  .alert-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+  .nav-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .nav-header h1 { margin: 0; }
+  .nav-header a { text-decoration: none; font-weight: 600; font-size: 0.95rem; padding: 0.5rem 0.9rem; border-radius: 8px; transition: background .15s; }
+  .nav-header a:hover { background: rgba(14,165,233,.1); }
+
+  .spoergsmaal-block {
+    background: #f8fafc;
+    padding: 1.25rem 1.25rem 1.4rem;
+    border-radius: 11px;
+    margin-bottom: 0.9rem;
+    border: 1.5px solid var(--border);
+    position: relative;
+    transition: border-color .15s;
+  }
+  .spoergsmaal-block:hover { border-color: #cbd5e1; }
+  .spoergsmaal-block .btn-danger { position: absolute; top: 0.85rem; right: 0.85rem; }
+
+  .besvar-card { max-width: 620px; margin: 2.5rem auto; }
+  .besvar-header { text-align: center; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .besvar-header h1 { color: var(--primary); margin-bottom: 0.35rem; }
+  .besvar-header p { color: var(--text-muted); margin: 0; font-size: 0.95rem; }
+  .sp-felt { margin-bottom: 1.4rem; }
+  .sp-felt > label { margin-top: 0; font-size: 1rem; }
+  .sp-num { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; background: var(--primary-light); color: var(--primary-hover); border-radius: 50%; font-size: 0.82rem; font-weight: 700; margin-right: 0.5rem; }
+
+  .print-toolbar { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: center; }
+
+  /* Likert på skærm */
+  .likert-wrap { margin-top: 0.6rem; }
+  .likert-labels { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+  .likert-rad { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .likert-knap {
+    flex: 1;
+    min-width: 48px;
+    text-align: center;
+    padding: 0.6rem 0.3rem;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+    background: #fff;
+    transition: all .15s;
+    font-weight: 500;
+  }
+  .likert-knap:hover { border-color: var(--primary); background: var(--primary-light); }
+  .likert-knap input { display: none; }
+  .likert-knap:has(input:checked) {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+  }
+  .likert-tabel { width: 100%; border-collapse: collapse; }
+  .likert-tabel td { text-align: center; padding: 0.4rem 0.2rem; font-size: 0.9rem; border: none; }
+
+  /* ============================================================
+     PRINT / A4
+     ============================================================ */
+  @media print {
+    @page { size: A4; margin: 18mm 16mm; }
+    body { background: #fff !important; color: #000; }
+    .no-print, .print-toolbar, .nav-header, button, .btn { display: none !important; }
+    .container { max-width: 100%; padding: 0; margin: 0; }
+    .card { box-shadow: none; border: none; padding: 0; margin: 0 0 1rem; }
+    .print-page { page-break-after: always; }
+    .print-page:last-child { page-break-after: auto; }
+
+    .print-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-bottom: 25px;
+    }
+    .print-grid .print-q {
+      margin-bottom: 0;
+    }
+    .print-grid .print-q.fuld-bredde {
+      grid-column: 1 / -1;
+    }
+
+    /* Hvert spørgsmål får en tydelig ramme */
+    .print-q {
+      page-break-inside: avoid;
+      border: 1.5px solid #000;
+      border-radius: 4px;
+      padding: 10px 12px 25px 12px; 
+    }
+  
+    .print-q h3 {
+      font-size: 11pt;
+      margin: 0 0 0 0; 
+      padding-bottom: 4px;
+      border-bottom: 1px dotted #888;
+      margin-bottom: 6px;
+    }
+
+    .print-line {
+      border-bottom: 1px solid #000;
+      height: 3rem;
+      margin-top: 0.5rem;
+    }
+
+    .print-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.3rem 0;
+      font-size: 10.5pt;
+    }
+    .print-box {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 1.5px solid #000;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .likert-tabel td { padding: 0.2rem 0.2rem; font-size: 9.5pt; border: none; }
+    .likert-tabel td small { font-size: 8.5pt; display: block; margin-top: 0.1rem; }
+    .likert-labels { font-size: 9pt; color: #333; }
+
+    .print-header {
+      text-align: center;
+      border-bottom: 2px solid #000;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .print-header h1 { font-size: 15pt; margin: 0; }
+
+    .print-footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      text-align: center;
+      font-size: 8pt;
+      color: #444;
+      border-top: 1px solid #ccc;
+      padding-top: 0.4rem;
+    }
+  }
+
+  .preview-a4 {
+    background: #fff;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 18mm 16mm;
+    box-shadow: var(--shadow-lg);
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  {% block content %}{% endblock %}
+</div>
+</body>
+</html>

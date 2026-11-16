@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Virum Fysioterapi</h1>
+<div class="card">
+  <h2>Vælg et spørgeskema</h2>
+  <p>Klik på et af spørgeskemaerne nedenfor for at besvare det. Det er helt anonymt.</p>
+  
+  {% if skemaer %}
+    <ul style="list-style: none; padding: 0;">
+      {% for id, navn in skemaer %}
+        <li style="margin-bottom: 10px;">
+          <a class="btn" href="{{ url_for('besvar', skema_id=id) }}">{{ navn }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p><em>Der er endnu ikke oprettet nogen spørgeskemaer.</em></p>
+  {% endif %}
+
+  <hr style="margin: 2rem 0;">
+  <a href="{{ url_for('admin_login') }}">Gå til Admin (Virum Fysioterapi)</a>
+</div>
+{% endblock %}
